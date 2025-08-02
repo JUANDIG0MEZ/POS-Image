@@ -1,6 +1,8 @@
-const express = require('express');
-const app = express();
-const PORT = 3000;
+import express from 'express'
+import multer from 'multer'
+
+const app = express()
+const PORT = 3000
 
 const upload = multer()
 
@@ -12,14 +14,12 @@ const allowedImageTypes = [
   'image/tiff',
   'image/bmp',
   'image/avif'
-];
-
-
+]
 
 app.get('/', (req, res) => {
-  res.send('¡Hola, mundo!');
-});
+  res.send('¡Hola, mundo!')
+})
 
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
+  console.log(`Servidor escuchando en http://localhost:${PORT}`)
+})
