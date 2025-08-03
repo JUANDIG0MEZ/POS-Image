@@ -1,5 +1,7 @@
 import multer from 'multer'
 
+import { MAX_FILE_SIZE_MB, MAX_UPLOAD_IMAGES } from './index.js'
+
 const allowedImageTypes = [
   'image/jpeg',
   'image/png',
@@ -10,11 +12,14 @@ const allowedImageTypes = [
   'image/avif'
 ]
 
-const upload = multer({
+export const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: (process.env.MAX_FILE_SIZE_MB || 5) * 1024 * 1024 // Default: 5 MB
+    fileSize: Number(MAX_FILE_SIZE_MB) * 1024 * 1024,
+    files: Number(MAX_UPLOAD_IMAGES)
+  },
+  fileFilter: (req, file, cb) => {
+    if (!allowedImageTypes.includes(file.mimetype)) return cb(new Error('Tipo de archivo no permitido'))
+    cb(null, true)
   }
 })
-
-module.exports = { upload, allowedImageTypes }
