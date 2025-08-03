@@ -1,3 +1,7 @@
+export const PORT = process.env.PORT
+
+export const JWT_SECRET = process.env.JWT_SECRET
+
 export const MAX_FILE_SIZE_MB = process.env.MAX_FILE_SIZE_MB
 export const MAX_UPLOAD_IMAGES = process.env.MAX_UPLOAD_IMAGES
 
