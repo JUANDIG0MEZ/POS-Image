@@ -1,12 +1,12 @@
 import express from 'express'
 import cors from 'cors'
-import https from 'https'
+import https from 'node:https'
 import fs from 'fs'
 
 import { upload } from './src/config/multerConfig.js'
 import { PORT } from './src/config/index.js'
 
-import { optimizeImage, uploadImageToR2, verifyImages, verifyToken } from './src/controllers/uploadProductImages.js'
+import { optimizeImage, saveImageKey, uploadImageToR2, verifyImages, verifyToken } from './src/controllers/uploadProductImages.js'
 
 const app = express()
 app.use(cors({
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 
 app.post('/upload', upload.array('images'), async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1]
+    const token = req.body.token
     const { imagesInfo, productId, idUser } = await verifyToken({ token })
     const imagesVerification = verifyImages({ images: req.files, imagesTokenInfo: imagesInfo })
     if (!imagesVerification) throw new Error('Error of verification')
@@ -35,6 +35,10 @@ app.post('/upload', upload.array('images'), async (req, res) => {
       req.files.map(async file => {
         const optimizedImageBuffer = await optimizeImage({ imageBuffer: file.buffer })
         const keyR2 = await uploadImageToR2({ imageBuffer: optimizedImageBuffer, baseKey })
+        const saved = await saveImageKey({ key: keyR2, productId, idUser })
+
+        console.log(`Imagen subida a R2: ${keyR2}, guardada en la base de datos: ${saved}`)
+        if (!saved) return null
         return keyR2
       })
     )
@@ -45,6 +49,10 @@ app.post('/upload', upload.array('images'), async (req, res) => {
     console.error('Error en la carga de imágenes:', error)
     res.status(500).send('Error en la carga de imágenes')
   }
+})
+
+export const agent = new https.Agent({
+  ca: fs.readFileSync('./certs/rootCA.pem')
 })
 
 const sslOptions = {

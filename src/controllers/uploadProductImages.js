@@ -1,10 +1,11 @@
 import { s3Client } from '../config/r2.js'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { JWT_SECRET, R2_BUCKET_NAME } from '../config/index.js'
+import { JWT_SECRET, R2_BUCKET_NAME, URL_API } from '../config/index.js'
 
 import sharp from 'sharp'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import { agent } from '../../index.js'
 
 export async function verifyToken ({ token }) {
   try {
@@ -38,7 +39,7 @@ export async function optimizeImage ({ imageBuffer }) {
 }
 
 export async function uploadImageToR2 ({ imageBuffer, baseKey }) {
-  const key = `${baseKey}/${crypto.randomUUID()}` // Define el nombre del archivo en R2
+  const key = `${baseKey}/${crypto.randomUUID()}.avif` // Define el nombre del archivo en R2
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: key,
@@ -48,4 +49,28 @@ export async function uploadImageToR2 ({ imageBuffer, baseKey }) {
 
   await s3Client.send(command)
   return key
+}
+
+export async function saveImageKey ({ key, productId, idUser }) {
+  try {
+    console.log('ruta', `${URL_API}/v1/imagenes/product/save-key`, 'key', key, 'productId', productId, 'idUser', idUser)
+    const response = await fetch(`${URL_API}/v1/imagenes/product/save-key`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ key, productId, idUser }),
+      dispacher: { agent }
+    })
+
+    console.log('response :', response)
+
+    if (!response.ok) {
+      throw new Error('Error al guardar la clave de la imagen')
+    }
+    return true
+  } catch (error) {
+    console.log('error', error)
+    return false
+  }
 }

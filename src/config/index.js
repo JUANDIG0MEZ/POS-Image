@@ -1,4 +1,5 @@
 export const PORT = process.env.PORT
+export const URL_API = process.env.URL_API
 
 export const JWT_SECRET = process.env.JWT_SECRET
 
