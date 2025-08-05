@@ -1,11 +1,9 @@
 import { s3Client } from '../config/r2.js'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { JWT_SECRET, R2_BUCKET_NAME, URL_API } from '../config/index.js'
-
 import sharp from 'sharp'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import { agent } from '../../index.js'
 
 export async function verifyToken ({ token }) {
   try {
@@ -59,8 +57,7 @@ export async function saveImageKey ({ key, productId, idUser }) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ key, productId, idUser }),
-      dispacher: { agent }
+      body: JSON.stringify({ key, productId, idUser })
     })
 
     console.log('response :', response)

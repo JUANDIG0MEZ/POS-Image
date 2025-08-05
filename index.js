@@ -1,16 +1,17 @@
 import express from 'express'
 import cors from 'cors'
-import https from 'node:https'
-import fs from 'fs'
 
 import { upload } from './src/config/multerConfig.js'
-import { PORT } from './src/config/index.js'
+import { PORT, URL_FRONTEND } from './src/config/index.js'
 
 import { optimizeImage, saveImageKey, uploadImageToR2, verifyImages, verifyToken } from './src/controllers/uploadProductImages.js'
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 const app = express()
+console.log('URL_FRONTEND:', URL_FRONTEND)
 app.use(cors({
-  origin: 'https://app.midominio.com:5173', // Your frontend's origin
+  origin: URL_FRONTEND, // Your frontend's origin
   credentials: true
 }))
 
@@ -51,15 +52,7 @@ app.post('/upload', upload.array('images'), async (req, res) => {
   }
 })
 
-export const agent = new https.Agent({
-  ca: fs.readFileSync('./certs/rootCA.pem')
-})
-
-const sslOptions = {
-  key: fs.readFileSync('./certs/image.midominio.com-key.pem'),
-  cert: fs.readFileSync('./certs/image.midominio.com.pem')
-}
-
-https.createServer(sslOptions, app).listen(PORT, () => {
-  console.log(`Servidor HTTPS escuchando en https://image.midominio.com:${PORT}`)
+app.listen(PORT, () => {
+  console.log(`PORT: ${PORT}`)
+  console.log('Servidor escuchando en https://image.poscolombia.com.co')
 })
